@@ -55,8 +55,7 @@ stress_pct = result["current_stress_prob"] * 100
 current_vol_pct = result["current_vol"] * 100
 
 with col1:
-    regime_color = "🔴" if result["current_regime"] == "STRESS" else "🟢"
-    st.metric("Current regime", f"{regime_color} {result['current_regime']}")
+    st.metric("Current regime", result["current_regime"])
 
 with col2:
     st.metric("Stress probability", f"{stress_pct:.1f}%")
@@ -72,7 +71,7 @@ with col4:
 # ---- Alert ----
 if result["current_stress_prob"] >= alert_threshold:
     st.error(
-        f"⚠️ REGIME ALERT: Stress probability is {stress_pct:.1f}%, "
+        f"REGIME ALERT: Stress probability is {stress_pct:.1f}%, "
         f"above the {alert_threshold*100:.0f}% threshold. "
         f"Current annualized vol: {current_vol_pct:.1f}%."
     )
