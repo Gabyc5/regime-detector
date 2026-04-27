@@ -217,7 +217,7 @@ st.plotly_chart(fig, use_container_width=True)
 # ---- Methodology ----
 with st.expander("Methodology"):
     st.markdown("""
-**Log returns:** Daily log returns are computed as ln(P_t / P_{t-1}).
+**Log returns:** Daily log returns are computed as $$ln(P_t / P_{t-1})$$.
 
 **Rolling volatility:** Standard deviation of log returns over the rolling
 window, annualized by multiplying by √252 (trading days per year).
