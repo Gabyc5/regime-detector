@@ -17,7 +17,7 @@ The detector:
 
 In February 2022, WTI crude oil's annualized volatility jumped from ~31% to ~79% in a matter of days. Any VaR model calibrated on the prior 6 months of data was using the wrong distribution. This detector would have flagged that regime shift within the first trading sessions.
 
-The same logic applies to any energy market dislocation: supply disruptions, geopolitical events, policy shocks. The tool doesn't predict *what* will happen — it tells you *which statistical world you're living in* so risk parameters can be adjusted accordingly.
+The same logic applies to any energy market dislocation: supply disruptions, geopolitical events, policy shocks. The tool doesn't predict *what* will happen, instead it tells you *which statistical world you're living in* so risk parameters can be adjusted accordingly.
 
 ## Setup
 
@@ -78,4 +78,4 @@ Python, Streamlit, Plotly, yfinance, hmmlearn, ruptures, pandas, NumPy
 
 ## Author
 
-Gaby Hernandez — [gabyhernandez.dev](https://gabyhernandez.dev) — [LinkedIn](https://www.linkedin.com/in/gaby-hernandez-gomez/)
+Gaby Hernandez  [gabyhernandez.dev](https://gabyhernandez.dev)      [LinkedIn](https://www.linkedin.com/in/gaby-hernandez-gomez/)
