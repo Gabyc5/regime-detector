@@ -52,7 +52,7 @@ regime-detector/
 
 ## How the math works
 
-**Log returns:** $$ln(P_t / P_{t-1})$$ - the continuously compounded return. Log returns are additive over time and approximately normally distributed, which is why they're used instead of simple percentage returns.
+**Log returns:** ln(P_t / P_{t-1}) — the continuously compounded return. Log returns are additive over time and approximately normally distributed, which is why they're used instead of simple percentage returns.
 
 **Rolling volatility:** Standard deviation of log returns over a rolling window (default: 21 trading days = 1 month), annualized by multiplying by √252.
 
@@ -76,4 +76,6 @@ All parameters are adjustable in the sidebar:
 
 Python, Streamlit, Plotly, yfinance, hmmlearn, ruptures, pandas, NumPy
 
-By: Gaby Hernandez:  [gabyhernandez.dev](https://gabyhernandez.dev)      [LinkedIn](https://www.linkedin.com/in/gaby-hernandez-gomez/)
+## Author
+
+Gaby Hernandez — [gabyhernandez.dev](https://gabyhernandez.dev) — [LinkedIn](https://www.linkedin.com/in/gaby-hernandez-gomez/)
