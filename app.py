@@ -37,25 +37,22 @@ st.markdown("""
 /* Paper texture background using CSS noise */
 .stApp {
     background-color: #F5F0E8;
-    background-image:
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
     color: #1A1A1D;
 }
 
-/* Subtle paper grain overlay */
-.stApp::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background:
-        radial-gradient(ellipse at 20% 50%, rgba(139,119,101,0.04) 0%, transparent 70%),
-        radial-gradient(ellipse at 80% 20%, rgba(139,119,101,0.03) 0%, transparent 60%),
-        radial-gradient(ellipse at 50% 80%, rgba(139,119,101,0.02) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
+section[data-testid="stSidebar"] {
+    background-color: #EDE8DF;
+    background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+    border-right: 1px solid #D4CFC6;
+}
+            
+section[data-testid="stSidebar"] .block-container,
+section[data-testid="stSidebar"] > div:first-child {
+    padding-top: 0.5rem !important;
+}
+[data-testid="stSidebarContent"] {
+    padding-top: 0.5rem !important;
 }
 
 /* Override Streamlit text colors */
