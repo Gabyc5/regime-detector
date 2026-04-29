@@ -46,6 +46,10 @@ section[data-testid="stSidebar"] {
     background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
     border-right: 1px solid #D4CFC6;
 }
+
+[data-testid="stSidebarUserContent"] {
+        padding-top: 0rem !important;
+    }
             
 section[data-testid="stSidebar"] .block-container,
 section[data-testid="stSidebar"] > div:first-child {
