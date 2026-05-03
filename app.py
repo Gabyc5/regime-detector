@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from regime_detector import SYMBOLS, run_analysis
+from regime_detector import SYMBOLS, SYMBOL_META, run_analysis
 
 # ---- Page config ----
 st.set_page_config(
@@ -243,6 +243,18 @@ st.markdown("""
     line-height: 1.7;
 }
 
+/* Market note */
+.market-note {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 0.78rem;
+    color: #6B6355;
+    font-style: italic;
+    line-height: 1.6;
+    margin: 0.6rem 0;
+    padding: 0.6rem 0.9rem;
+    border-left: 2px solid #C8BFA8;
+}
+
 /* Ledger table */
 .ledger-table {
     width: 100%;
@@ -304,7 +316,7 @@ section[data-testid="stSidebar"] label {
     font-family: 'Source Serif 4', Georgia, serif;
 }
 
-/* Green sliders */
+/* Green sliders — thumb */
 div[data-baseweb="slider"] div[role="slider"] {
     background: #4A6741 !important;
     border-color: #4A6741 !important;
@@ -312,12 +324,27 @@ div[data-baseweb="slider"] div[role="slider"] {
 div[data-baseweb="slider"] div[data-testid="stTickBar"] > div {
     background: #4A6741 !important;
 }
-            
 .stSlider > div > div > div[data-testid="stTickBar"] > div {
     background: #4A6741 !important;
 }
 .stSlider [role="slider"] {
     background: #4A6741 !important;
+}
+
+/* Green sliders — track (filled portion) */
+div[data-baseweb="slider"] div[role="progressbar"] > div {
+    background: #4A6741 !important;
+}
+div[data-baseweb="slider"] div[role="progressbar"] > div > div {
+    background: #4A6741 !important;
+}
+/* Fallback: target the inner track bar via Streamlit test IDs */
+div[data-baseweb="slider"] div[data-testid="stSliderTrack"] > div:first-child {
+    background: #4A6741 !important;
+}
+/* Target the active track highlight */
+div[data-baseweb="slider"] [class*="Track"] > div:first-child {
+    background-color: #4A6741 !important;
 }
 
 /* Hide Streamlit metric elements */
@@ -336,11 +363,34 @@ st.sidebar.markdown(
     "reopen with the arrow at top-left.</span>",
     unsafe_allow_html=True,
 )
+
 symbol_name = st.sidebar.selectbox("Commodity", list(SYMBOLS.keys()), index=0)
 symbol = SYMBOLS[symbol_name]
+meta = SYMBOL_META.get(symbol, {"currency": "USD", "unit": ""})
+currency_symbol = "€" if meta["currency"] == "EUR" else "$"
+
 years = st.sidebar.slider("History (years)", 1, 10, 5)
 window = st.sidebar.slider("Rolling window (trading days)", 5, 63, 21)
 alert_threshold = st.sidebar.slider("Stress alert threshold", 0.5, 0.95, 0.7, 0.05)
+
+# TTF / Henry Hub note in sidebar
+if symbol == "TTF=F":
+    st.sidebar.markdown(
+        "<span style='font-size:0.72rem;color:#6B6355;font-style:italic;'>"
+        "TTF (Title Transfer Facility) is the European benchmark for natural gas, "
+        "priced in EUR/MWh. It reflects global LNG supply dynamics and is sensitive "
+        "to geopolitical disruptions affecting shipping routes. "
+        "For US domestic gas exposure, use Henry Hub.</span>",
+        unsafe_allow_html=True,
+    )
+elif symbol == "NG=F":
+    st.sidebar.markdown(
+        "<span style='font-size:0.72rem;color:#6B6355;font-style:italic;'>"
+        "Henry Hub is the US domestic benchmark for natural gas, priced in USD/MMBtu. "
+        "US prices can decouple from global markets due to domestic production levels "
+        "and pipeline-connected supply. For European/global gas exposure, use TTF.</span>",
+        unsafe_allow_html=True,
+    )
 
 # ---- Run analysis ----
 with st.spinner("Typesetting today's edition..."):
@@ -409,15 +459,15 @@ st.markdown(f"""
 if result["current_stress_prob"] >= alert_threshold:
     st.markdown(f"""
     <div class="wire-alert">
-        REGIME ALERT &mdash; Stress probability {stress_pct:.1f}%, above {alert_threshold*100:.0f}% threshold.
-        Vol: {current_vol_pct:.1f}%. Calm avg: {calm_vol:.1f}%. Stress avg: {stress_vol:.1f}%.
+    REGIME ALERT &mdash; Stress probability {stress_pct:.1f}%, above {alert_threshold*100:.0f}% threshold.
+    Vol: {current_vol_pct:.1f}%. Calm avg: {calm_vol:.1f}%. Stress avg: {stress_vol:.1f}%.
     </div>
     """, unsafe_allow_html=True)
 
 # Stats
 st.markdown(f"""
 <div class="stat-row">
-    <div class="stat-item"><div class="stat-label">Last close</div><div class="stat-value">${latest_price:.2f}</div></div>
+    <div class="stat-item"><div class="stat-label">Last close</div><div class="stat-value">{currency_symbol}{latest_price:.2f}</div></div>
     <div class="stat-item"><div class="stat-label">Daily return</div><div class="stat-value">{price_change:+.2f}%</div></div>
     <div class="stat-item"><div class="stat-label">Ann. vol</div><div class="stat-value">{current_vol_pct:.1f}%</div></div>
     <div class="stat-item"><div class="stat-label">Stress prob.</div><div class="stat-value">{stress_pct:.0f}%</div></div>
@@ -426,11 +476,39 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# ---- Market note for gas commodities ----
+is_henry_hub = symbol == "NG=F"
+is_ttf = symbol == "TTF=F"
+
+if is_henry_hub:
+    st.markdown(
+        '<div class="market-note">'
+        '<strong>Note on Henry Hub vs. global gas markets.</strong> '
+        'Henry Hub reflects US domestic natural gas, where prices are driven by '
+        'local production, pipeline supply, weather, and storage levels. '
+        'US gas can trade in a calm regime even when global markets are under stress. '
+        'For European and global LNG exposure, select Natural Gas (TTF Europe) above.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+elif is_ttf:
+    st.markdown(
+        '<div class="market-note">'
+        '<strong>Note on TTF vs. US gas markets.</strong> '
+        'TTF is the European benchmark, priced in EUR/MWh at the Dutch Title Transfer Facility. '
+        'It captures global LNG supply dynamics, shipping route disruptions, and European storage cycles. '
+        'TTF and Henry Hub can diverge significantly when geopolitical events affect '
+        'global supply routes without impacting US domestic production.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
 # ---- Today's Reading ----
 st.markdown('<div class="section-orn">&#9830; &#9830; &#9830;</div>', unsafe_allow_html=True)
 
 # Generate narrative
 vol_ratio = current_vol_pct / calm_vol if calm_vol > 0 else 1
+
 if result["current_regime"] == "STRESS":
     if stress_pct > 90:
         narrative = (
@@ -438,9 +516,8 @@ if result["current_regime"] == "STRESS":
             f"{stress_pct:.0f}% confidence. Current volatility ({current_vol_pct:.1f}%) "
             f"is running {vol_ratio:.1f}x the calm-regime average. "
             f"Risk parameters calibrated on calm-period data are likely understating "
-            f"stress-regime assumptions."
-            
-"true exposure. VaR and margin calculations should use stress-regime inputs."
+            f"true exposure. VaR and margin calculations should use "
+            f"stress-regime inputs."
         )
     else:
         narrative = (
@@ -481,7 +558,7 @@ fig = make_subplots(
     shared_xaxes=True,
     vertical_spacing=0.06,
     row_heights=[0.4, 0.3, 0.3],
-    subplot_titles=[f"{symbol_name} (USD)", f"{window}-day annualized vol", "Stress probability"],
+    subplot_titles=[f"{symbol_name} ({meta['currency']})", f"{window}-day annualized vol", "Stress probability"],
 )
 
 fig.add_trace(go.Scatter(
@@ -509,7 +586,6 @@ fig.add_trace(go.Scatter(
     x=vol.index, y=vol.values * 100, name="Vol",
     line=dict(color="#2E4A2E", width=1.4),
 ), row=2, col=1)
-
 fig.add_hline(y=calm_vol, line_dash="dot", line_color="#2E4A2E",
               annotation_text=f"Calm: {calm_vol:.1f}%", row=2, col=1)
 fig.add_hline(y=stress_vol, line_dash="dot", line_color="#5C1010",
@@ -564,8 +640,8 @@ if len(change_idx) > 0:
 
     st.markdown(f"""
     <table class="ledger-table">
-        <tr><th>Date</th><th>Regime</th><th>Vol</th><th>Stress Prob.</th></tr>
-        {rows_html}
+    <tr><th>Date</th><th>Regime</th><th>Vol</th><th>Stress Prob.</th></tr>
+    {rows_html}
     </table>
     """, unsafe_allow_html=True)
 else:
@@ -599,11 +675,12 @@ calm for years blew out in weeks.
 st.markdown('<div class="section-orn">&#9830; &#9830; &#9830;</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-head">Methodology Notes</div>', unsafe_allow_html=True)
 
-st.markdown("""
+st.markdown(r"""
 <div class="method-text" style="column-count:2; column-gap:1.5rem; column-rule: 1px solid #C8BFA8;">
-<strong>Volatility.</strong> Daily log returns are computed as ln(P_t / P_{t-1}).
+<strong>Volatility.</strong> Daily log returns are computed as
+$$\ln(P_t \,/\, P_{t-1})$$.
 Rolling standard deviation over the configured window is annualized by
-multiplying by √252. This produces a continuously updated estimate of
+multiplying by $$\sqrt{252}$$. This produces a continuously updated estimate of
 realized volatility relative to recent history.
 <br><br>
 <strong>Regime classification.</strong> A two-state Gaussian Hidden Markov Model
@@ -648,9 +725,9 @@ built on calm-period data are likely understating exposure.
 # Footer
 st.markdown("""
 <div class="paper-footer">
-    The Regime Monitor is a research instrument, not financial advice. &bull;
-    Built by <a href="https://gabyhernandez.dev">Gaby Hernandez</a> &bull;
-    Data via Yahoo Finance &bull; Model recalibrates on each load
+The Regime Monitor is a research instrument, not financial advice. &bull;
+Built by <a href="https://gabyhernandez.dev">Gaby Hernandez</a> &bull;
+Data via Yahoo Finance &bull; Model recalibrates on each load
 </div>
 """, unsafe_allow_html=True)
 

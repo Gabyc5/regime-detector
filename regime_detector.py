@@ -1,5 +1,6 @@
 """
 regime_detector.py
+
 Core engine for energy market regime change detection.
 Computes rolling log-return volatility and classifies market state
 using a two-state Hidden Markov Model (calm vs. stress).
@@ -11,15 +12,25 @@ import yfinance as yf
 from hmmlearn.hmm import GaussianHMM
 from datetime import datetime, timedelta
 
-
 # ---- Data fetching ----
 
 SYMBOLS = {
     "WTI Crude": "CL=F",
     "Brent Crude": "BZ=F",
-    "Natural Gas": "NG=F",
+    "Natural Gas (Henry Hub)": "NG=F",
+    "Natural Gas (TTF Europe)": "TTF=F",
     "RBOB Gasoline": "RB=F",
     "Heating Oil": "HO=F",
+}
+
+# Currency and unit metadata for display
+SYMBOL_META = {
+    "CL=F":  {"currency": "USD", "unit": "bbl"},
+    "BZ=F":  {"currency": "USD", "unit": "bbl"},
+    "NG=F":  {"currency": "USD", "unit": "MMBtu"},
+    "TTF=F": {"currency": "EUR", "unit": "MWh"},
+    "RB=F":  {"currency": "USD", "unit": "gal"},
+    "HO=F":  {"currency": "USD", "unit": "gal"},
 }
 
 
@@ -103,9 +114,11 @@ def detect_changepoints(vol_series: pd.Series, penalty: int = 10) -> list:
     clean = vol_series.dropna().values
     algo = rpt.Pelt(model="rbf").fit(clean)
     breakpoints = algo.predict(pen=penalty)
+
     # Convert indices back to dates
     idx = vol_series.dropna().index
     dates = [idx[bp - 1] for bp in breakpoints if bp < len(idx)]
+
     return dates
 
 
