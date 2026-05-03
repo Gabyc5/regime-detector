@@ -306,11 +306,18 @@ section[data-testid="stSidebar"] label {
 
 /* Green sliders */
 div[data-baseweb="slider"] div[role="slider"] {
-    background: #2E4A2E !important;
-    border-color: #2E4A2E !important;
+    background: #4A6741 !important;
+    border-color: #4A6741 !important;
 }
 div[data-baseweb="slider"] div[data-testid="stTickBar"] > div {
-    background: #2E4A2E !important;
+    background: #4A6741 !important;
+}
+            
+.stSlider > div > div > div[data-testid="stTickBar"] > div {
+    background: #4A6741 !important;
+}
+.stSlider [role="slider"] {
+    background: #4A6741 !important;
 }
 
 /* Hide Streamlit metric elements */
@@ -429,33 +436,33 @@ if result["current_regime"] == "STRESS":
         narrative = (
             f"The model places {symbol_name} firmly in a stress regime with "
             f"{stress_pct:.0f}% confidence. Current volatility ({current_vol_pct:.1f}%) "
-            f"is running {vol_ratio:.1f}x the calm-regime average. Risk parameters "
-            f"calibrated on the last six months of calm data are likely understating "
-            f"true exposure. VaR and margin calculations should be reviewed against "
+            f"is running {vol_ratio:.1f}x the calm-regime average. "
+            f"Risk parameters calibrated on calm-period data are likely understating "
             f"stress-regime assumptions."
+            
+"true exposure. VaR and margin calculations should use stress-regime inputs."
         )
     else:
         narrative = (
             f"{symbol_name} is showing elevated stress signals ({stress_pct:.0f}% probability). "
             f"Volatility at {current_vol_pct:.1f}% sits between the calm average ({calm_vol:.1f}%) "
-            f"and stress average ({stress_vol:.1f}%). This is the ambiguous zone where "
-            f"regime transitions tend to happen. Worth monitoring closely over the next "
-            f"few sessions."
+            f"and stress average ({stress_vol:.1f}%). "
+            f"The transition zone between regimes. "
+            f"Monitor over the next few sessions."
         )
 else:
     if stress_pct < 10:
         narrative = (
             f"{symbol_name} markets are firmly in a calm regime ({100-stress_pct:.0f}% confidence). "
             f"Volatility at {current_vol_pct:.1f}% is close to the calm-period average "
-            f"of {calm_vol:.1f}%. Standard risk parameters are appropriate. No regime "
-            f"transition signals detected."
+            f"of {calm_vol:.1f}%. Standard risk parameters are appropriate. No transition signals."
         )
     else:
         narrative = (
             f"{symbol_name} is operating in a calm regime but with a non-trivial stress "
             f"reading ({stress_pct:.0f}%). Volatility at {current_vol_pct:.1f}% remains "
             f"near the calm average ({calm_vol:.1f}%), but the model is picking up early "
-            f"signals that could precede a transition. Not actionable yet, but worth watching."
+            f"signals that could precede a transition. Not actionable yet. Worth watching."
         )
 
 st.markdown(f"""
@@ -624,17 +631,17 @@ st.markdown('<div class="section-head">Editor\'s Note</div>', unsafe_allow_html=
 
 st.markdown("""
 <div class="body-serif">
-This tool exists because risk models fail quietly. They don't throw errors
-when the market changes underneath them. They just keep running the same math
-on data that no longer describes the world. I built this after spending weeks
-studying how a major energy trading firm lost hundreds of millions when their
-risk parameters couldn't keep up with a regime shift they didn't detect in time.
+I built this after studying how a major energy trading firm lost hundreds of millions
+when volatility shifted regimes faster than their risk models could recalibrate.
+Their VaR was calculated on six months of calm-period data. The market moved to
+stress-period behavior in days. The math was correct. The inputs were wrong.
 <br><br>
-The Regime Monitor doesn't predict what will happen. It tells you which
-statistical world you're in right now, so you can decide whether your numbers
-still mean what you think they mean.
+This tool monitors which regime the market is currently in. It computes rolling
+volatility, fits a two-state model, and reports the probability that today's data
+belongs to the stress distribution. If the probability is high, risk parameters
+built on calm-period data are likely understating exposure.
 <br><br>
-<em style="color:#8A8070;">— G. Hernandez, Houston, 2026</em>
+<em style="color:#8A8070;">G. Hernandez, Houston, 2026</em>
 </div>
 """, unsafe_allow_html=True)
 
